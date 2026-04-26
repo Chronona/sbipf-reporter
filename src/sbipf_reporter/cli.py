@@ -6,18 +6,21 @@ from pathlib import Path
 
 import typer
 
-from sbipf_reporter.formatter import print_holdings, print_summary
 from sbipf_reporter.parser import parse_sbi_csv
+from sbipf_reporter.reporter import OutputFormat, output_report
 
 app = typer.Typer()
 
 
 @app.command()
-def report(file: Path) -> None:
+def report(
+    file: Path,
+    format: OutputFormat = OutputFormat.TERMINAL,
+    output: Path | None = None,
+) -> None:
     """SBI証券CSVからポートフォリオレポートを出力."""
     holdings = parse_sbi_csv(file)
-    print_summary(holdings)
-    print_holdings(holdings)
+    output_report(holdings, format, output)
 
 
 @app.command()
