@@ -13,6 +13,9 @@ dependencies = [
     "rich>=13.0.0",
 ]
 
+[project.scripts]
+sbipf-reporter = "sbipf_reporter.cli:app"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0.0",
