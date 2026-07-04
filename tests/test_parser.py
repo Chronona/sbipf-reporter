@@ -88,3 +88,15 @@ def test_parse_sbi_csv_enclosed_headers() -> None:
     assert len(nisa_growth) == 13
     nisa_tsumitate = [h for h in holdings if h.account_type == AccountType.NISA_TSUMITATE]
     assert len(nisa_tsumitate) == 1
+
+
+def test_parse_sbi_csv_square_brackets() -> None:
+    """Test parsing CSV with [] enclosed section headers."""
+    holdings = parse_sbi_csv(Path("tests/fixtures/sbi_square_brackets.csv"))
+    assert len(holdings) == 16
+    tokuhu = [h for h in holdings if h.account_type == AccountType.TOKUHU]
+    assert len(tokuhu) == 2
+    nisa_growth = [h for h in holdings if h.account_type == AccountType.NISA_GROWTH]
+    assert len(nisa_growth) == 13
+    nisa_tsumitate = [h for h in holdings if h.account_type == AccountType.NISA_TSUMITATE]
+    assert len(nisa_tsumitate) == 1

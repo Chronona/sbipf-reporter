@@ -96,7 +96,7 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
             continue
 
         # Detect section boundary by header patterns
-        clean_header = first_cell.strip("【】")
+        clean_header = first_cell.strip("【】[]")
         if clean_header.startswith("株式（") or clean_header.startswith("投資信託（"):
             current_account_type = _detect_account_type(clean_header)
             is_data_section = False
