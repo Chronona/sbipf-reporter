@@ -75,3 +75,16 @@ def test_holding_dataclass() -> None:
     assert holding.code == "6758"
     assert holding.name == "ソニー"
     assert holding.account_type == AccountType.GENBUTSU
+
+
+def test_parse_sbi_csv_enclosed_headers() -> None:
+    """Test parsing CSV with 【】 enclosed section headers."""
+    holdings = parse_sbi_csv(Path("tests/fixtures/sbi_enclosed_headers.csv"))
+    assert len(holdings) == 16
+    # Verify account types are still detected correctly
+    tokuhu = [h for h in holdings if h.account_type == AccountType.TOKUHU]
+    assert len(tokuhu) == 2  # 6758 ソニー (two entries in sample)
+    nisa_growth = [h for h in holdings if h.account_type == AccountType.NISA_GROWTH]
+    assert len(nisa_growth) == 13
+    nisa_tsumitate = [h for h in holdings if h.account_type == AccountType.NISA_TSUMITATE]
+    assert len(nisa_tsumitate) == 1
