@@ -96,8 +96,9 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
             continue
 
         # Detect section boundary by header patterns
-        if first_cell.startswith("株式（") or first_cell.startswith("投資信託（"):
-            current_account_type = _detect_account_type(first_cell)
+        clean_header = first_cell.strip("【】")
+        if clean_header.startswith("株式（") or clean_header.startswith("投資信託（"):
+            current_account_type = _detect_account_type(clean_header)
             is_data_section = False
             continue
 
@@ -129,8 +130,8 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
                         account_type=current_account_type,
                         buy_date=row[1].strip(),
                         quantity=int(row[2]),
-                        average_price=float(row[4]),
-                        current_price=float(row[5]),
+                        average_price=float(row[3]),
+                        current_price=float(row[4]),
                         profit_loss=float(row[8]),
                         evaluation_value=float(row[10]),
                     )
