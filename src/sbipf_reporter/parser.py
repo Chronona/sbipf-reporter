@@ -39,7 +39,10 @@ def _detect_account_type(section_header: str) -> AccountType:
         return AccountType.TOKUHU
     if "現物/NISA預り(成長投資枠)" in section_header or "成長投資枠" in section_header:
         return AccountType.NISA_GROWTH
-    if "現物/NISA預り(つみたて投資枠)" in section_header or "つみたて投資枠" in section_header:
+    if (
+        "現物/NISA預り(つみたて投資枠)" in section_header
+        or "つみたて投資枠" in section_header
+    ):
         return AccountType.NISA_TSUMITATE
     if "現物" in section_header:
         return AccountType.GENBUTSU
@@ -57,9 +60,16 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
     """
     holdings: list[Holding] = []
 
-    with open(file_path, encoding="utf-8-sig") as f:
-        reader = csv.reader(f)
-        rows = list(reader)
+    encodings = ["utf-8-sig", "cp932", "utf-8"]
+    for enc in encodings:
+        try:
+            with open(file_path, encoding=enc) as f:
+                rows = list(csv.reader(f))
+            break
+        except UnicodeDecodeError:
+            continue
+    else:
+        raise RuntimeError(f"Failed to decode {file_path} with any of {encodings}")
 
     current_account_type = AccountType.UNKNOWN
     is_data_section = False
@@ -104,7 +114,11 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
                 code = parts[0] if parts else ""
                 name = parts[1] if len(parts) > 1 else ""
 
-                if first_cell.startswith("ｅＭＡＸＩＳ") or first_cell.startswith("ｉＦｒｅｅ") or first_cell.startswith("ＳＢＩ・"):
+                if (
+                    first_cell.startswith("ｅＭＡＸＩＳ")
+                    or first_cell.startswith("ｉＦｒｅｅ")
+                    or first_cell.startswith("ＳＢＩ・")
+                ):
                     code = ""
                     name = first_cell
 
