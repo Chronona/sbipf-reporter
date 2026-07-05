@@ -18,7 +18,13 @@ def report(
     format: OutputFormat = OutputFormat.TERMINAL,
     output: Path | None = None,
 ) -> None:
-    """SBI証券CSVからポートフォリオレポートを出力."""
+    """SBI証券CSVからポートフォリオレポートを出力.
+
+    Args:
+        file: SBI証券のポートフォリオCSVファイルのパス
+        format: 出力フォーマット（terminal / md / csv）
+        output: 出力ファイルパス（formatがmd/csvの場合に指定）
+    """
     holdings = parse_sbi_csv(file)
     output_report(holdings, format, output)
 
@@ -27,6 +33,7 @@ def report(
 def version() -> None:
     """バージョンを表示."""
     from sbipf_reporter import __version__
+
     typer.echo(f"sbipf-reporter v{__version__}")
 
 
