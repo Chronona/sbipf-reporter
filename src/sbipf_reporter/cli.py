@@ -20,6 +20,16 @@ def report(
 ) -> None:
     """SBI証券CSVからポートフォリオレポートを出力.
 
+    対応フォーマット:
+      - terminal: ターミナルに rich テーブル表示（デフォルト）
+      - md: Markdown ファイル出力
+      - csv: CSV ファイル出力
+
+    使用例:
+      sbipf-reporter report portfolio.csv
+      sbipf-reporter report portfolio.csv --format md --output report.md
+      sbipf-reporter report portfolio.csv --format csv --output report.csv
+
     Args:
         file: SBI証券のポートフォリオCSVファイルのパス
         format: 出力フォーマット（terminal / md / csv）

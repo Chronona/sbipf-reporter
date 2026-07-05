@@ -10,12 +10,17 @@ from sbipf_reporter.parser import Holding
 
 
 class OutputFormat(Enum):
-    """出力フォーマット.
+    """レポート出力フォーマット.
+
+    選択可能なフォーマット:
+      - terminal: rich ライブラリによるカラフルなテーブル表示
+      - md: Markdown 形式（GitHub等で参照可能）
+      - csv: 損益率カラムを追加したCSV（Excel等で開く場合に便利）
 
     Attributes:
         TERMINAL: ターミナル表示（richテーブル）
         MD: Markdown形式ファイル出力
-        CSV: CSV形式ファイル出力
+        CSV: CSV形式ファイル出力（損益率カラム追加）
     """
 
     TERMINAL = "terminal"
@@ -115,11 +120,16 @@ def format_as_markdown(holdings: list[Holding], output_path: Path) -> None:
 def output_report(
     holdings: list[Holding], output_format: OutputFormat, output_path: Path | None
 ) -> None:
-    """指定されたフォーマットでレポートを出力する.
+    """パース結果を指定フォーマットで出力する.
+
+    TERMINAL の場合は rich ライブラリを使用してコンソールに表示.
+    MD/CSV の場合は output_path にファイル出力.
+    output_path が None の場合、デフォルトのファイル名
+    (portfolio.md / portfolio.csv) を使用する.
 
     Args:
-        holdings: 保有銘柄リスト
-        output_format: 出力フォーマット
+        holdings: パース済みの保有銘柄リスト
+        output_format: 出力フォーマット（terminal / md / csv）
         output_path: 出力ファイルパス（terminalの場合は無視）
     """
     if output_format == OutputFormat.CSV:
