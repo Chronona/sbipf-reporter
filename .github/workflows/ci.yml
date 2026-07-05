@@ -74,7 +74,8 @@ jobs:
 
       - name: Publish to TestPyPI
         if: steps.bump.outputs.new_version
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        run: |
+          twine upload --repository-url https://test.pypi.org/legacy/ dist/*
