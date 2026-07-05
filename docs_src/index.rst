@@ -3,13 +3,31 @@ sbipf-reporter
 
 SBI証券のポートフォリオCSVから、わかりやすいレポートを生成するCLIツール。
 
-**対応フォーマット:**
-  - 端末表示（rich テーブル）
-  - Markdown ファイル出力
-  - CSV ファイル出力（損益率付き）
+対応フォーマット: 端末表示（rich テーブル） | Markdown ファイル出力 | CSV ファイル出力
 
-ユーザーガイド
---------------
+インストール
+------------
+
+.. code-block:: bash
+
+   pip install sbipf-reporter
+
+クイックスタート
+----------------
+
+.. code-block:: bash
+
+   # ターミナルに表示
+   sbipf-reporter report portfolio.csv
+
+   # Markdown ファイルに出力
+   sbipf-reporter report portfolio.csv --format md --output report.md
+
+   # バージョン確認
+   sbipf-reporter version
+
+詳細ガイド
+----------
 
 .. toctree::
    :maxdepth: 2
