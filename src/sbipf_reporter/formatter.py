@@ -44,10 +44,10 @@ def format_holdings_table(holdings: list[Holding]) -> Table:
             h.name,
             h.account_type.value,
             f"{h.quantity:,}",
-            f"¥{h.average_price:,.0f}",
-            f"¥{h.current_price:,.0f}",
-            f"¥{eval_str}",
-            f"¥{profit_str}",
+            f"\\{h.average_price:,.0f}",
+            f"\\{h.current_price:,.0f}",
+            f"\\{eval_str}",
+            f"\\{profit_str}",
             rate_str,
         )
 
@@ -70,8 +70,8 @@ def print_summary(holdings: list[Holding]) -> None:
 
     console.print()
     console.print(f"[bold]保有者数:[/bold] {len(holdings)} 件")
-    console.print(f"[bold]総資産:[/bold] ¥{total_eval:,.0f}")
-    console.print(f"[bold]総損益:[/bold] ¥{total_profit:+,.0f} ({total_rate:+.2f}%)")
+    console.print(f"[bold]総資産:[/bold] \\{total_eval:,.0f}")
+    console.print(f"[bold]総損益:[/bold] \\{total_profit:+,.0f} ({total_rate:+.2f}%)")
     console.print()
 
 
