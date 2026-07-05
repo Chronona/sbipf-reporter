@@ -54,7 +54,7 @@ jobs:
       - name: Bump version
         id: bump
         run: |
-          python scripts/bump_version.py >> "$GITHUB_OUTPUT"
+          python scripts/bump_version.py | grep "^new_version=" >> "$GITHUB_OUTPUT"
 
       - name: Commit and tag
         if: steps.bump.outputs.new_version
