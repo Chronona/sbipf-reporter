@@ -30,13 +30,8 @@ def format_holdings_table(holdings: list[Holding]) -> Table:
     table.add_column("損益率", justify="right")
 
     for h in holdings:
-        profit_rate = (
-            (h.profit_loss / h.evaluation_value * 100)
-            if h.evaluation_value != 0
-            else 0.0
-        )
         profit_str = f"{h.profit_loss:+,.0f}"
-        rate_str = f"{profit_rate:+.2f}%"
+        rate_str = f"{h.profit_loss_rate:+.2f}%"
         eval_str = f"{h.evaluation_value:,.0f}"
 
         table.add_row(
@@ -64,9 +59,7 @@ def print_summary(holdings: list[Holding]) -> None:
 
     total_eval = sum(h.evaluation_value for h in holdings)
     total_profit = sum(h.profit_loss for h in holdings)
-    total_rate = (
-        (total_profit / (total_eval - total_profit) * 100) if total_eval > 0 else 0
-    )
+    total_rate = (total_profit / (total_eval - total_profit) * 100) if total_eval > 0 else 0
 
     console.print()
     console.print(f"[bold]保有者数:[/bold] {len(holdings)} 件")

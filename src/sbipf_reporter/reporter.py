@@ -53,11 +53,6 @@ def format_as_csv(holdings: list[Holding], output_path: Path) -> None:
         )
 
         for h in holdings:
-            profit_rate = (
-                (h.profit_loss / h.evaluation_value * 100)
-                if h.evaluation_value != 0
-                else 0.0
-            )
             writer.writerow(
                 [
                     h.code or "",
@@ -69,7 +64,7 @@ def format_as_csv(holdings: list[Holding], output_path: Path) -> None:
                     h.current_price,
                     h.evaluation_value,
                     h.profit_loss,
-                    f"{profit_rate:.2f}",
+                    f"{h.profit_loss_rate:.2f}",
                 ]
             )
 
@@ -89,27 +84,24 @@ def format_as_markdown(holdings: list[Holding], output_path: Path) -> None:
     ]
 
     for h in holdings:
-        profit_rate = (
-            (h.profit_loss / h.evaluation_value * 100)
-            if h.evaluation_value != 0
-            else 0.0
-        )
         lines.append(
-            f"| {h.code or '-'} | {h.name} | {h.account_type.value} | {h.buy_date} | {h.quantity:,} | ¥{h.average_price:,.0f} | ¥{h.current_price:,.0f} | ¥{h.evaluation_value:,.0f} | ¥{h.profit_loss:+,.0f} | {profit_rate:+.2f}% |"
+            f"| {h.code or '-'} | {h.name} | {h.account_type.value} | {h.buy_date} | {h.quantity:,} | "
+            f"¥{h.average_price:,.0f} | ¥{h.current_price:,.0f} | ¥{h.evaluation_value:,.0f} | "
+            f"¥{h.profit_loss:+,.0f} | {h.profit_loss_rate:+.2f}% |"
         )
 
     total_eval = sum(h.evaluation_value for h in holdings)
     total_profit = sum(h.profit_loss for h in holdings)
-    total_rate = (
-        (total_profit / (total_eval - total_profit) * 100)
-        if total_eval > total_profit
-        else 0.0
-    )
+    total_rate = (total_profit / (total_eval - total_profit) * 100) if total_eval > total_profit else 0.0
 
     lines.extend(
         [
             "",
-            f"**合計**: 保有数 {len(holdings)}件, 総資産 ¥{total_eval:,.0f}, 損益 ¥{total_profit:+,.0f} ({total_rate:+.2f}%)",
+            (
+                f"**合計**: 保有数 {len(holdings)}件, "
+                f"総資産 ¥{total_eval:,.0f}, "
+                f"損益 ¥{total_profit:+,.0f} ({total_rate:+.2f}%)"
+            ),
         ]
     )
 
@@ -117,9 +109,7 @@ def format_as_markdown(holdings: list[Holding], output_path: Path) -> None:
         f.write("\n".join(lines))
 
 
-def output_report(
-    holdings: list[Holding], output_format: OutputFormat, output_path: Path | None
-) -> None:
+def output_report(holdings: list[Holding], output_format: OutputFormat, output_path: Path | None) -> None:
     """パース結果を指定フォーマットで出力する.
 
     TERMINAL の場合は rich ライブラリを使用してコンソールに表示.

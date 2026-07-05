@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/Chronona/sbipf-reporter/actions/workflows/ci.yml/badge.svg)](https://github.com/Chronona/sbipf-reporter/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/)
+[![PyPI version](https://img.shields.io/pypi/v/sbipf-reporter)](https://pypi.org/project/sbipf-reporter/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 SBI証券のポートフォリオCSVからレポートを生成するCLIツール。
@@ -17,7 +18,7 @@ SBI証券のポートフォリオCSVからレポートを生成するCLIツー�
 ## インストール
 
 ```bash
-pip install git+https://github.com/Chronona/sbipf-reporter.git
+pip install sbipf-reporter
 ```
 
 ## 使い方

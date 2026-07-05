@@ -21,10 +21,7 @@ def get_last_tag() -> str | None:
 
 
 def get_commits_since(tag: str | None) -> list[str]:
-    if tag:
-        cmd = ["git", "log", f"{tag}..HEAD", "--format=%s"]
-    else:
-        cmd = ["git", "log", "--format=%s"]
+    cmd = ["git", "log", f"{tag}..HEAD", "--format=%s"] if tag else ["git", "log", "--format=%s"]
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=REPO_ROOT)
     return result.stdout.strip().splitlines() if result.stdout.strip() else []
 
@@ -37,11 +34,7 @@ def detect_bump_type(messages: list[str]) -> str:
         if msg.startswith("feat"):
             return "minor"
     for msg in messages:
-        if (
-            msg.startswith("fix")
-            or msg.startswith("chore")
-            or msg.startswith("refactor")
-        ):
+        if msg.startswith("fix") or msg.startswith("chore") or msg.startswith("refactor"):
             return "patch"
     return "patch"
 
@@ -59,9 +52,7 @@ def bump_version(version: str, bump_type: str) -> str:
 def update_pyproject(new_version: str) -> None:
     path = REPO_ROOT / "pyproject.toml"
     content = path.read_text(encoding="utf-8")
-    content = re.sub(
-        r'^version = ".*"', f'version = "{new_version}"', content, flags=re.MULTILINE
-    )
+    content = re.sub(r'^version = ".*"', f'version = "{new_version}"', content, flags=re.MULTILINE)
     path.write_text(content, encoding="utf-8")
 
 
