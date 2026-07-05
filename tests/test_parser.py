@@ -100,3 +100,23 @@ def test_parse_sbi_csv_square_brackets() -> None:
     assert len(nisa_growth) == 13
     nisa_tsumitate = [h for h in holdings if h.account_type == AccountType.NISA_TSUMITATE]
     assert len(nisa_tsumitate) == 1
+
+
+def test_parse_sbi_csv_10col_format() -> None:
+    """Test parsing CSV without reference price column (10-col format)."""
+    holdings = parse_sbi_csv(Path("tests/fixtures/sbi_10col.csv"))
+    assert len(holdings) == 3
+
+    tokuhu = [h for h in holdings if h.account_type == AccountType.TOKUHU]
+    assert len(tokuhu) == 2
+    assert tokuhu[0].code == "6758"
+    assert tokuhu[0].average_price == 9800.0
+    assert tokuhu[0].current_price == 10240.0
+    assert tokuhu[0].evaluation_value == 51200.0
+
+    nisa_growth = [h for h in holdings if h.account_type == AccountType.NISA_GROWTH]
+    assert len(nisa_growth) == 1
+    assert nisa_growth[0].code == "4755"
+    assert nisa_growth[0].average_price == 300.0
+    assert nisa_growth[0].current_price == 320.0
+    assert nisa_growth[0].evaluation_value == 64000.0

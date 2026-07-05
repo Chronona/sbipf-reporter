@@ -33,6 +33,18 @@ class Holding:
     evaluation_value: float
 
 
+@dataclass
+class ColumnLayout:
+    """CSV列レイアウト."""
+
+    col_date: int
+    col_quantity: int
+    col_average_price: int
+    col_current_price: int
+    col_profit_loss: int
+    col_evaluation_value: int
+
+
 def _detect_account_type(section_header: str) -> AccountType:
     """セクション見出しから口座区分を検出する."""
     if "現物/特定預り" in section_header or "特定" in section_header:
@@ -47,6 +59,39 @@ def _detect_account_type(section_header: str) -> AccountType:
     if "現物" in section_header:
         return AccountType.GENBUTSU
     return AccountType.UNKNOWN
+
+
+def _detect_layout(header_row: list[str]) -> ColumnLayout:
+    """ヘッダー行から列レイアウトを検出する.
+
+    SBI証券CSVには2つのフォーマットが存在する:
+    - 11列版: 参考単価, 取得単価, 現在値, ... (古いフォーマット)
+    - 10列版: 取得単価, 現在値, ... (新しいフォーマット、参考単価なし)
+    """
+    headers = [h.strip() for h in header_row]
+
+    # 11列版かどうかを「参考単価」の有無で判定
+    has_reference = any("参考単価" in h for h in headers)
+
+    if has_reference:
+        return ColumnLayout(
+            col_date=1,
+            col_quantity=2,
+            col_average_price=4,
+            col_current_price=5,
+            col_profit_loss=8,
+            col_evaluation_value=10,
+        )
+    else:
+        # 10列版: 参考単価がなく、取得単価が3列目
+        return ColumnLayout(
+            col_date=1,
+            col_quantity=2,
+            col_average_price=3,
+            col_current_price=4,
+            col_profit_loss=7,
+            col_evaluation_value=9,
+        )
 
 
 def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
@@ -73,6 +118,7 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
 
     current_account_type = AccountType.UNKNOWN
     is_data_section = False
+    layout: ColumnLayout | None = None
 
     for row in rows:
         if not row or len(row) == 0:
@@ -89,9 +135,9 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
             is_data_section = False
             continue
 
-        # Detect section header
+        # Detect section header (column names row)
         if "銘柄（コード）" in first_cell or "ファンド名" in first_cell:
-            # Try to find account type from surrounding context
+            layout = _detect_layout(row)
             is_data_section = True
             continue
 
@@ -103,7 +149,7 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
             continue
 
         # Parse data rows
-        if is_data_section and len(row) >= 11:
+        if is_data_section and len(row) >= 10 and layout is not None:
             try:
                 # Determine if stock or fund based on code pattern
                 code_name = row[0].strip()
@@ -128,12 +174,12 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
                         code=code,
                         name=name,
                         account_type=current_account_type,
-                        buy_date=row[1].strip(),
-                        quantity=int(row[2]),
-                        average_price=float(row[4]),
-                        current_price=float(row[5]),
-                        profit_loss=float(row[8]),
-                        evaluation_value=float(row[10]),
+                        buy_date=row[layout.col_date].strip(),
+                        quantity=int(row[layout.col_quantity]),
+                        average_price=float(row[layout.col_average_price]),
+                        current_price=float(row[layout.col_current_price]),
+                        profit_loss=float(row[layout.col_profit_loss]),
+                        evaluation_value=float(row[layout.col_evaluation_value]),
                     )
                 )
             except (ValueError, IndexError):
