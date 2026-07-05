@@ -72,6 +72,14 @@ pip install -e ".[dev]"
 pytest
 ```
 
+## 免責事項 / Disclaimer
+
+本ツールは **非公式** であり、株式会社SBI証券とは一切関係がありません。
+SBI証券が提供・承認・サポートするものではありません。
+
+This is an **unofficial** third-party tool and is not affiliated with,
+endorsed by, or supported by SBI Securities.
+
 ## ライセンス
 
 MIT
