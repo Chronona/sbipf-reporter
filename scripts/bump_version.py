@@ -74,6 +74,22 @@ def update_init(new_version: str) -> None:
 
 def main() -> None:
     dry_run = "--dry-run" in sys.argv
+
+    # --set VERSION: 指定されたバージョンを直接書き込む
+    if "--set" in sys.argv:
+        idx = sys.argv.index("--set")
+        if idx + 1 >= len(sys.argv):
+            print("Usage: python scripts/bump_version.py --set X.Y.Z", file=sys.stderr)
+            sys.exit(1)
+        new_version = sys.argv[idx + 1]
+        print(f"new_version={new_version}")
+        if not dry_run:
+            update_pyproject(new_version)
+            update_init(new_version)
+            print(f"Updated to {new_version}")
+        return
+
+    # 従来の auto-bump: 前回タグからのコミットを解析
     last_tag = get_last_tag()
     commits = get_commits_since(last_tag)
 

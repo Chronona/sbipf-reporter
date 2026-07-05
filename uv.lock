@@ -270,7 +270,7 @@ wheels = [
 
 [[package]]
 name = "sbipf-reporter"
-version = "0.1.1"
+version = "0.4.1"
 source = { editable = "." }
 dependencies = [
     { name = "rich" },
