@@ -9,7 +9,10 @@ from pathlib import Path
 
 
 class AccountType(Enum):
-    """口座区分.
+    """SBI証券の口座区分.
+
+    SBI証券のCSV出力に含まれるセクション見出しから自動判別される.
+    例: 「株式（現物/特定預り）】【 特定口座】」→ TOKUHU
 
     Attributes:
         GENBUTSU: 現物口座
@@ -28,18 +31,21 @@ class AccountType(Enum):
 
 @dataclass
 class Holding:
-    """保有金融商品情報.
+    """SBI証券CSVの1行分の保有金融商品情報を表すデータクラス.
+
+    parse_sbi_csv() の戻り値としてリスト形式で返される.
+    各フィールドはCSVの列から抽出され、数値は float/int に変換済み.
 
     Attributes:
         code: 証券コード（投資信託の場合は空文字）
         name: 銘柄名
-        account_type: 口座区分
-        buy_date: 買付日
+        account_type: 口座区分（AccountType Enum）
+        buy_date: 買付日（文字列、CSVの値そのまま）
         quantity: 保有数量
-        average_price: 取得単価
-        current_price: 現在値
-        profit_loss: 損益額
-        evaluation_value: 評価額
+        average_price: 取得単価（円）
+        current_price: 現在値（円）
+        profit_loss: 損益額（円、負数は損失）
+        evaluation_value: 評価額（円）
     """
 
     code: str
@@ -115,13 +121,30 @@ def _detect_layout(header_row: list[str]) -> ColumnLayout:
 
 
 def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
-    """SBI証券CSVファイルをパースして保有銘柄リストを返す.
+    """SBI証券のポートフォリオCSVをパースし、保有銘柄リストを返す.
+
+     対応するCSVフォーマット:
+
+       - 11列版（参考単価あり）: 古いフォーマット
+       - 10列版（参考単価なし）: 新しいフォーマット
+
+     ヘッダー行の「参考単価」の有無で自動判別する.
+
+     文字コードは utf-8-sig → cp932 → utf-8 の順で自動判定する.
+
+    CSVの構造:
+      - 【株式（現物/特定預り）】のようなセクション見出しから口座区分を判別
+      - 「銘柄（コード）」または「ファンド名」行をデータ開始位置として検出
+      - 「合計」行や集計行はスキップ
 
     Args:
-        file_path: CSVファイルのパス
+        file_path: SBI証券CSVファイルのパス
 
     Returns:
-        Holdingのリスト
+        パース結果の Holding リスト
+
+    Raises:
+        RuntimeError: サポートする文字コードでデコードできなかった場合
     """
     holdings: list[Holding] = []
 
