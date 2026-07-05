@@ -58,6 +58,12 @@ class Holding:
     profit_loss: float
     evaluation_value: float
 
+    @property
+    def profit_loss_rate(self) -> float:
+        if self.evaluation_value == 0:
+            return 0.0
+        return self.profit_loss / self.evaluation_value * 100
+
 
 @dataclass
 class ColumnLayout:
@@ -77,10 +83,7 @@ def _detect_account_type(section_header: str) -> AccountType:
         return AccountType.TOKUHU
     if "現物/NISA預り(成長投資枠)" in section_header or "成長投資枠" in section_header:
         return AccountType.NISA_GROWTH
-    if (
-        "現物/NISA預り(つみたて投資枠)" in section_header
-        or "つみたて投資枠" in section_header
-    ):
+    if "現物/NISA預り(つみたて投資枠)" in section_header or "つみたて投資枠" in section_header:
         return AccountType.NISA_TSUMITATE
     if "現物" in section_header:
         return AccountType.GENBUTSU

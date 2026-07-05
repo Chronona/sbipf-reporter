@@ -1,9 +1,10 @@
 """Tests for reporter module."""
+from __future__ import annotations
 
 from pathlib import Path
 
 from sbipf_reporter.parser import parse_sbi_csv
-from sbipf_reporter.reporter import OutputFormat, format_as_csv, format_as_markdown
+from sbipf_reporter.reporter import format_as_csv, format_as_markdown
 
 
 def test_format_as_csv(tmp_path: Path) -> None:

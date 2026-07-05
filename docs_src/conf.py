@@ -1,15 +1,15 @@
 """Sphinx configuration."""
 
+from __future__ import annotations
+
 import os
 import sys
 
 suppress_warnings = ["ref.duplicate"]
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-import sbipf_reporter
+import sbipf_reporter  # noqa: E402
 
 project = "sbipf-reporter"
 author = "Chronona"
