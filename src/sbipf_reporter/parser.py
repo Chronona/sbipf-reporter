@@ -9,7 +9,15 @@ from pathlib import Path
 
 
 class AccountType(Enum):
-    """口座区分."""
+    """口座区分.
+
+    Attributes:
+        GENBUTSU: 現物口座
+        NISA_GROWTH: NISA成長投資枠
+        NISA_TSUMITATE: NISAつみたて投資枠
+        TOKUHU: 特定口座
+        UNKNOWN: 判別不能
+    """
 
     GENBUTSU = "現物"
     NISA_GROWTH = "NISA(成長)"
@@ -20,7 +28,19 @@ class AccountType(Enum):
 
 @dataclass
 class Holding:
-    """保有金融商品情報."""
+    """保有金融商品情報.
+
+    Attributes:
+        code: 証券コード（投資信託の場合は空文字）
+        name: 銘柄名
+        account_type: 口座区分
+        buy_date: 買付日
+        quantity: 保有数量
+        average_price: 取得単価
+        current_price: 現在値
+        profit_loss: 損益額
+        evaluation_value: 評価額
+    """
 
     code: str
     name: str

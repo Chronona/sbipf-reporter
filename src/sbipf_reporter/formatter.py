@@ -9,7 +9,14 @@ from sbipf_reporter.parser import Holding
 
 
 def format_holdings_table(holdings: list[Holding]) -> Table:
-    """Holdingリストからrichテーブルを生成する."""
+    """Holdingリストからrichテーブルを生成する.
+
+    Args:
+        holdings: 保有銘柄リスト
+
+    Returns:
+        rich.Table インスタンス
+    """
     table = Table(title="SBI証券ポートフォリオ")
 
     table.add_column("コード", style="cyan", no_wrap=True)
@@ -23,7 +30,11 @@ def format_holdings_table(holdings: list[Holding]) -> Table:
     table.add_column("損益率", justify="right")
 
     for h in holdings:
-        profit_rate = (h.profit_loss / h.evaluation_value * 100) if h.evaluation_value != 0 else 0.0
+        profit_rate = (
+            (h.profit_loss / h.evaluation_value * 100)
+            if h.evaluation_value != 0
+            else 0.0
+        )
         profit_str = f"{h.profit_loss:+,.0f}"
         rate_str = f"{profit_rate:+.2f}%"
         eval_str = f"{h.evaluation_value:,.0f}"
@@ -44,12 +55,18 @@ def format_holdings_table(holdings: list[Holding]) -> Table:
 
 
 def print_summary(holdings: list[Holding]) -> None:
-    """サマリー信息を出力する."""
+    """サマリー情報を出力する.
+
+    Args:
+        holdings: 保有銘柄リスト
+    """
     console = Console()
 
     total_eval = sum(h.evaluation_value for h in holdings)
     total_profit = sum(h.profit_loss for h in holdings)
-    total_rate = (total_profit / (total_eval - total_profit) * 100) if total_eval > 0 else 0
+    total_rate = (
+        (total_profit / (total_eval - total_profit) * 100) if total_eval > 0 else 0
+    )
 
     console.print()
     console.print(f"[bold]保有者数:[/bold] {len(holdings)} 件")
@@ -59,7 +76,11 @@ def print_summary(holdings: list[Holding]) -> None:
 
 
 def print_holdings(holdings: list[Holding]) -> None:
-    """Holdingリストをテーブル形式で出力する."""
+    """Holdingリストをテーブル形式で出力する.
+
+    Args:
+        holdings: 保有銘柄リスト
+    """
     console = Console()
     table = format_holdings_table(holdings)
     console.print(table)
