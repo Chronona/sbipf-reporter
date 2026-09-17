@@ -121,3 +121,16 @@ def test_parse_sbi_csv_10col_format() -> None:
     assert nisa_growth[0].average_price == 300.0
     assert nisa_growth[0].current_price == 320.0
     assert nisa_growth[0].evaluation_value == 64000.0
+
+
+def test_parse_thousand_separators() -> None:
+    """桁区切りカンマ付きの数値を含む行をパースできる."""
+    holdings = parse_sbi_csv(Path("tests/fixtures/sbi_thousand_separators.csv"))
+
+    assert len(holdings) == 1
+    holding = holdings[0]
+    assert holding.quantity == 1000
+    assert holding.average_price == 9850.0
+    assert holding.current_price == 10240.0
+    assert holding.profit_loss == 390000.0
+    assert holding.evaluation_value == 10240000.0
