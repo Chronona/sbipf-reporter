@@ -1,0 +1,40 @@
+name: 作業タスク
+description: 実施する作業を管理するための Issue を作成する
+title: "[Task] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        作業内容と「終わった」と判断できる条件を明確にしてください。
+
+        - 「(必須)」と書かれた項目は、可能な限りご記入ください。
+        - 認証情報・個人情報・非公開の内部情報は記載しないでください。
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: 目的 (必須)
+      description: この作業が何のために必要かを記載してください。背景や関連する Issue があれば併記してください。
+      placeholder: 例) ...を整備し、以後の作業で同じ確認を繰り返さずに済むようにする。
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 完了条件 (必須)
+      description: 満たされたら完了と判断できる条件をチェックリストで記載してください。行頭の `- [ ]` はそのまま使えます。
+      value: |
+        - [ ]
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 補足
+      description: 作業手順の候補、前提となる依存関係、注意点などがあれば記載してください。
+    validations:
+      required: false

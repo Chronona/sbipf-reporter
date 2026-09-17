@@ -1,56 +1,73 @@
 name: バグ報告
-description: 動作がおかしい・エラーになる場合はこちら
-title: "[Bug]: "
-labels: ["bug"]
+description: 想定どおりに動作しない問題を報告する
+title: "[Bug] "
 body:
   - type: markdown
     attributes:
       value: |
-        バグ報告ありがとうございます。再現に必要な情報を教えてください。
+        ご報告ありがとうございます。調査に必要な情報をご記入ください。
+
+        - 「(必須)」と書かれた項目は、可能な限りご記入ください。
+        - 認証情報・個人情報・非公開の内部情報は記載しないでください。
 
         > [!CAUTION]
         > **ポートフォリオCSVをそのまま貼らないでください。**
-        > このツールが扱うCSVには保有銘柄・数量・評価額といった個人の資産情報が含まれます。
+        > このツールが扱うCSVには、保有銘柄・数量・評価額といったあなたの資産情報が含まれます。
+        > 調査に必要なのは「列構成」「見出しの書式」「文字コード」であって、実際の金額ではありません。
         > 再現データを貼る場合は、**銘柄名・数量・金額を架空の値に置き換えてから**貼ってください。
-        > 再現に必要なのは「列構成」「見出しの書式」「文字コード」であって、実際の金額ではありません。
 
   - type: checkboxes
     id: preflight
     attributes:
-      label: 事前確認
+      label: 事前確認 (必須)
       options:
         - label: 同じ内容の Issue が既にないか検索した
           required: true
-        - label: 貼り付けるCSV・出力から個人の資産情報を除去した（CSVを貼らない場合もチェック）
+        - label: 貼り付けるCSV・ログから資産情報を除去した（CSVを貼らない場合もチェック）
           required: true
 
   - type: textarea
-    id: what-happened
+    id: summary
     attributes:
-      label: 発生した事象
-      description: 何が起きたかを書いてください。
-      placeholder: 半角括弧のセクション見出しを含むCSVで、口座区分が全件「Unknown」と表示される。
-    validations:
-      required: true
-
-  - type: textarea
-    id: expected
-    attributes:
-      label: 期待する挙動
-      description: 本来どうなるべきだと考えますか。
-      placeholder: 見出しの括弧が半角でも「特定」「NISA(成長)」などが判別されてほしい。
+      label: 概要 (必須)
+      description: 何が起きているかを1〜3文で説明してください。
+      placeholder: 例) 半角括弧のセクション見出しを含むCSVで、口座の列がすべて Unknown になる。
     validations:
       required: true
 
   - type: textarea
     id: steps
     attributes:
-      label: 再現手順
-      description: 手順を順番に書いてください。
+      label: 再現手順 (必須)
+      description: 第三者が同じ状態を再現できる粒度で、番号付きで記載してください。
       placeholder: |
         1. 下記のCSVを portfolio.csv として保存する
         2. `sbipf-reporter report portfolio.csv` を実行する
-        3. 口座の列がすべて Unknown になっている
+        3. 口座の列を確認する
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待する挙動 (必須)
+      description: 本来どうなるべきだと考えているかを記載してください。
+      placeholder: 例) 見出しの括弧が半角でも「特定」「NISA(成長)」が判別されてほしい。
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 実際の挙動 (必須)
+      description: 実際に何が起きたかを記載してください。エラーメッセージやログがあれば引用してください。
+      placeholder: |
+        実際の結果:
+
+        エラーメッセージ / ログ:
+        ```
+        ここに貼り付け
+        ```
     validations:
       required: true
 
@@ -58,7 +75,7 @@ body:
     id: command
     attributes:
       label: 実行したコマンド
-      description: 実際に実行したコマンドを貼ってください。
+      description: 実際に実行したコマンドを記載してください。
       render: shell
 
   - type: textarea
@@ -71,39 +88,16 @@ body:
       render: csv
 
   - type: textarea
-    id: logs
+    id: environment
     attributes:
-      label: エラーメッセージ / スタックトレース
-      description: エラーが出た場合は全文を貼ってください。
-      render: shell
-
-  - type: input
-    id: version
-    attributes:
-      label: sbipf-reporter のバージョン
-      description: "`sbipf-reporter version` の出力を貼ってください。"
-      placeholder: sbipf-reporter v0.4.2
-    validations:
-      required: true
-
-  - type: input
-    id: python-version
-    attributes:
-      label: Python のバージョン
-      description: "`python --version` の出力を貼ってください。"
-      placeholder: Python 3.12.3
-    validations:
-      required: true
-
-  - type: dropdown
-    id: os
-    attributes:
-      label: OS
-      options:
-        - Windows
-        - macOS
-        - Linux
-        - その他
+      label: 環境情報 (必須)
+      description: 事象を確認した環境を記載してください。分かる範囲で構いません。
+      value: |
+        - sbipf-reporter のバージョン (`sbipf-reporter version` の出力):
+        - OS とそのバージョン:
+        - Python のバージョン (`python --version` の出力):
+        - インストール方法 (pip / ソースから等):
+        - CSVの文字コード (分かれば):
     validations:
       required: true
 
@@ -118,9 +112,26 @@ body:
         - md
         - csv
         - 出力以前の問題（パース時など）
+    validations:
+      required: false
+
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: 再現頻度
+      description: どの程度の頻度で発生しますか。
+      options:
+        - 毎回発生する
+        - ときどき発生する
+        - 一度だけ発生した
+        - 不明
+    validations:
+      required: false
 
   - type: textarea
-    id: notes
+    id: additional
     attributes:
-      label: 補足
-      description: その他、参考になりそうなことがあれば書いてください。
+      label: 追加情報
+      description: スクリーンショット、関連する Issue や Pull Request、回避策など、参考になる情報があれば記載してください。
+    validations:
+      required: false
