@@ -62,7 +62,7 @@ def print_summary(holdings: list[Holding]) -> None:
     total_rate = (total_profit / (total_eval - total_profit) * 100) if total_eval > 0 else 0
 
     console.print()
-    console.print(f"[bold]保有者数:[/bold] {len(holdings)} 件")
+    console.print(f"[bold]保有銘柄数:[/bold] {len(holdings)} 件")
     console.print(f"[bold]総資産:[/bold] \\{total_eval:,.0f}")
     console.print(f"[bold]総損益:[/bold] \\{total_profit:+,.0f} ({total_rate:+.2f}%)")
     console.print()
