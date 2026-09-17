@@ -6,6 +6,7 @@ from rich.console import Console
 from rich.table import Table
 
 from sbipf_reporter.parser import Holding
+from sbipf_reporter.summary import summarize
 
 
 def format_holdings_table(holdings: list[Holding]) -> Table:
@@ -56,15 +57,12 @@ def print_summary(holdings: list[Holding]) -> None:
         holdings: 保有銘柄リスト
     """
     console = Console()
-
-    total_eval = sum(h.evaluation_value for h in holdings)
-    total_profit = sum(h.profit_loss for h in holdings)
-    total_rate = (total_profit / (total_eval - total_profit) * 100) if total_eval > 0 else 0
+    total = summarize(holdings)
 
     console.print()
-    console.print(f"[bold]保有者数:[/bold] {len(holdings)} 件")
-    console.print(f"[bold]総資産:[/bold] \\{total_eval:,.0f}")
-    console.print(f"[bold]総損益:[/bold] \\{total_profit:+,.0f} ({total_rate:+.2f}%)")
+    console.print(f"[bold]保有銘柄数:[/bold] {total.count} 件")
+    console.print(f"[bold]総資産:[/bold] \\{total.total_evaluation:,.0f}")
+    console.print(f"[bold]総損益:[/bold] \\{total.total_profit_loss:+,.0f} ({total.profit_loss_rate:+.2f}%)")
     console.print()
 
 

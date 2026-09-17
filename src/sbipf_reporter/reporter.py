@@ -7,6 +7,7 @@ from enum import Enum
 from pathlib import Path
 
 from sbipf_reporter.parser import Holding
+from sbipf_reporter.summary import summarize
 
 
 class OutputFormat(Enum):
@@ -90,17 +91,15 @@ def format_as_markdown(holdings: list[Holding], output_path: Path) -> None:
             f"¥{h.profit_loss:+,.0f} | {h.profit_loss_rate:+.2f}% |"
         )
 
-    total_eval = sum(h.evaluation_value for h in holdings)
-    total_profit = sum(h.profit_loss for h in holdings)
-    total_rate = (total_profit / (total_eval - total_profit) * 100) if total_eval > total_profit else 0.0
+    total = summarize(holdings)
 
     lines.extend(
         [
             "",
             (
-                f"**合計**: 保有数 {len(holdings)}件, "
-                f"総資産 ¥{total_eval:,.0f}, "
-                f"損益 ¥{total_profit:+,.0f} ({total_rate:+.2f}%)"
+                f"**合計**: 保有数 {total.count}件, "
+                f"総資産 ¥{total.total_evaluation:,.0f}, "
+                f"損益 ¥{total.total_profit_loss:+,.0f} ({total.profit_loss_rate:+.2f}%)"
             ),
         ]
     )
