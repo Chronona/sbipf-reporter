@@ -1,0 +1,56 @@
+name: 機能要望
+description: 新しい機能や既存機能の改善を提案する
+title: "[Feature] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ご提案ありがとうございます。判断材料となる背景をご記入ください。
+
+        - 「(必須)」と書かれた項目は、可能な限りご記入ください。
+        - 認証情報・個人情報・非公開の内部情報は記載しないでください。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 解決したい課題 (必須)
+      description: 現状のどこに困っているか、誰がどの場面で困るかを記載してください。解決策ではなく課題を書いてください。
+      placeholder: 例) ...をするたびに手作業が必要で、作業時間がかかっている。
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 提案する解決策 (必須)
+      description: どのような挙動になれば課題が解消されるかを記載してください。
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 検討した代替案
+      description: 他に検討した方法と、それを選ばなかった理由を記載してください。検討していない場合は「なし」と記載してください。
+    validations:
+      required: false
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 影響範囲の想定
+      description: 既存の利用方法への影響をどう見込んでいますか。
+      options:
+        - 後方互換 (既存の利用方法は変わらない)
+        - 破壊的変更を含む可能性がある
+        - 不明
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 追加情報
+      description: 参考になる資料、想定するインターフェース案、関連する Issue や Pull Request があれば記載してください。
+    validations:
+      required: false

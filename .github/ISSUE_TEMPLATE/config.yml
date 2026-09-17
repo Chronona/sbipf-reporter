@@ -1,0 +1,22 @@
+# テンプレートに当てはまらない起票を塞がないため、空の Issue を許可する。
+# （アカウント共通 Chronona/.github の config.yml と同じ方針）
+blank_issues_enabled: true
+
+# --- feature_request.yml / task.yml がここに複製されている理由 ---
+# Issue テンプレートの上書きは ISSUE_TEMPLATE フォルダ単位のオールオアナッシングで、
+# このリポジトリが自前のテンプレートを1つでも持つと、アカウント共通
+# (Chronona/.github) のテンプレートは1つも使われなくなる。不足分だけ補うマージは
+# 行われないため、共通版の feature_request.yml / task.yml を complete set として
+# ここに複製している。
+#
+# bug_report.yml だけは、このツール固有の事情（ポートフォリオCSVに資産情報が
+# 含まれるため、生データの貼り付けを止める必要がある）から独自版を置いている。
+#
+# 共通側を更新したら、feature_request.yml / task.yml の再複製が必要。
+# 差分確認:
+#   diff <(git -C /path/to/Chronona-.github show HEAD:.github/ISSUE_TEMPLATE/task.yml) \
+#        .github/ISSUE_TEMPLATE/task.yml
+contact_links:
+  - name: ドキュメント
+    url: https://chronona.github.io/sbipf-reporter/
+    about: インストール方法・使い方・対応CSVフォーマット・APIリファレンス

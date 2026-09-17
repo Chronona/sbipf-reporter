@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+- GitHub Issue Forms のテンプレートを追加（バグ報告 / 機能要望 / 作業タスク）。
+  バグ報告のみリポジトリ固有版、機能要望と作業タスクはアカウント共通 (Chronona/.github) の複製
+
 ### Documentation
 - README.md を充実（バッジ・機能一覧・出力例・対応フォーマット・ライセンスを追加）
 - docstring 強化（公開関数すべてに Args/Returns を記載）

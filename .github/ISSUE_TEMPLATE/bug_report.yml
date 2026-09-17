@@ -1,0 +1,137 @@
+name: バグ報告
+description: 想定どおりに動作しない問題を報告する
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ご報告ありがとうございます。調査に必要な情報をご記入ください。
+
+        - 「(必須)」と書かれた項目は、可能な限りご記入ください。
+        - 認証情報・個人情報・非公開の内部情報は記載しないでください。
+
+        > [!CAUTION]
+        > **ポートフォリオCSVをそのまま貼らないでください。**
+        > このツールが扱うCSVには、保有銘柄・数量・評価額といったあなたの資産情報が含まれます。
+        > 調査に必要なのは「列構成」「見出しの書式」「文字コード」であって、実際の金額ではありません。
+        > 再現データを貼る場合は、**銘柄名・数量・金額を架空の値に置き換えてから**貼ってください。
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: 事前確認 (必須)
+      options:
+        - label: 同じ内容の Issue が既にないか検索した
+          required: true
+        - label: 貼り付けるCSV・ログから資産情報を除去した（CSVを貼らない場合もチェック）
+          required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 概要 (必須)
+      description: 何が起きているかを1〜3文で説明してください。
+      placeholder: 例) 半角括弧のセクション見出しを含むCSVで、口座の列がすべて Unknown になる。
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順 (必須)
+      description: 第三者が同じ状態を再現できる粒度で、番号付きで記載してください。
+      placeholder: |
+        1. 下記のCSVを portfolio.csv として保存する
+        2. `sbipf-reporter report portfolio.csv` を実行する
+        3. 口座の列を確認する
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待する挙動 (必須)
+      description: 本来どうなるべきだと考えているかを記載してください。
+      placeholder: 例) 見出しの括弧が半角でも「特定」「NISA(成長)」が判別されてほしい。
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 実際の挙動 (必須)
+      description: 実際に何が起きたかを記載してください。エラーメッセージやログがあれば引用してください。
+      placeholder: |
+        実際の結果:
+
+        エラーメッセージ / ログ:
+        ```
+        ここに貼り付け
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: 実行したコマンド
+      description: 実際に実行したコマンドを記載してください。
+      render: shell
+
+  - type: textarea
+    id: csv-sample
+    attributes:
+      label: 再現するCSV（値を架空のものに置き換えたもの）
+      description: |
+        列構成と見出しの書式がわかる最小限の抜粋を貼ってください。
+        **実際の銘柄名・数量・金額は架空の値に置き換えてください。**
+      render: csv
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 環境情報 (必須)
+      description: 事象を確認した環境を記載してください。分かる範囲で構いません。
+      value: |
+        - sbipf-reporter のバージョン (`sbipf-reporter version` の出力):
+        - OS とそのバージョン:
+        - Python のバージョン (`python --version` の出力):
+        - インストール方法 (pip / ソースから等):
+        - CSVの文字コード (分かれば):
+    validations:
+      required: true
+
+  - type: dropdown
+    id: output-format
+    attributes:
+      label: 出力フォーマット
+      description: 事象が発生したフォーマットを選んでください（複数選択可）。
+      multiple: true
+      options:
+        - terminal
+        - md
+        - csv
+        - 出力以前の問題（パース時など）
+    validations:
+      required: false
+
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: 再現頻度
+      description: どの程度の頻度で発生しますか。
+      options:
+        - 毎回発生する
+        - ときどき発生する
+        - 一度だけ発生した
+        - 不明
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 追加情報
+      description: スクリーンショット、関連する Issue や Pull Request、回避策など、参考になる情報があれば記載してください。
+    validations:
+      required: false
