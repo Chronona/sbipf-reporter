@@ -1,0 +1,7 @@
+# Discussions はこのリポジトリでは未使用のため、フォームに当てはまらない報告の
+# 逃げ道として空のIssueを許可している。フォームでの報告を徹底したい場合は false にする。
+blank_issues_enabled: true
+contact_links:
+  - name: ドキュメント
+    url: https://chronona.github.io/sbipf-reporter/
+    about: インストール方法・使い方・対応CSVフォーマット・APIリファレンス

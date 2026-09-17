@@ -1,0 +1,52 @@
+name: 機能追加の提案
+description: 新しい機能や改善の提案はこちら
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提案ありがとうございます。何を実現したいのかを教えてください。
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: 事前確認
+      options:
+        - label: 同じ内容の Issue が既にないか検索した
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 解決したい課題
+      description: どんなときに困っているかを書いてください。機能の形ではなく、困りごとを書いてください。
+      placeholder: 口座区分ごとの評価額の内訳が知りたいが、現状は全体の合計しか出ない。
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 提案する機能
+      description: どう解決したいかを書いてください。
+    validations:
+      required: true
+
+  - type: textarea
+    id: interface
+    attributes:
+      label: 想定するコマンド / 出力
+      description: CLIのオプションや出力のイメージがあれば書いてください。
+      render: shell
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 検討した代替案
+      description: 他のやり方を検討していれば書いてください。
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 補足

@@ -1,0 +1,126 @@
+name: バグ報告
+description: 動作がおかしい・エラーになる場合はこちら
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        バグ報告ありがとうございます。再現に必要な情報を教えてください。
+
+        > [!CAUTION]
+        > **ポートフォリオCSVをそのまま貼らないでください。**
+        > このツールが扱うCSVには保有銘柄・数量・評価額といった個人の資産情報が含まれます。
+        > 再現データを貼る場合は、**銘柄名・数量・金額を架空の値に置き換えてから**貼ってください。
+        > 再現に必要なのは「列構成」「見出しの書式」「文字コード」であって、実際の金額ではありません。
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: 事前確認
+      options:
+        - label: 同じ内容の Issue が既にないか検索した
+          required: true
+        - label: 貼り付けるCSV・出力から個人の資産情報を除去した（CSVを貼らない場合もチェック）
+          required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 発生した事象
+      description: 何が起きたかを書いてください。
+      placeholder: 半角括弧のセクション見出しを含むCSVで、口座区分が全件「Unknown」と表示される。
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待する挙動
+      description: 本来どうなるべきだと考えますか。
+      placeholder: 見出しの括弧が半角でも「特定」「NISA(成長)」などが判別されてほしい。
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      description: 手順を順番に書いてください。
+      placeholder: |
+        1. 下記のCSVを portfolio.csv として保存する
+        2. `sbipf-reporter report portfolio.csv` を実行する
+        3. 口座の列がすべて Unknown になっている
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: 実行したコマンド
+      description: 実際に実行したコマンドを貼ってください。
+      render: shell
+
+  - type: textarea
+    id: csv-sample
+    attributes:
+      label: 再現するCSV（値を架空のものに置き換えたもの）
+      description: |
+        列構成と見出しの書式がわかる最小限の抜粋を貼ってください。
+        **実際の銘柄名・数量・金額は架空の値に置き換えてください。**
+      render: csv
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: エラーメッセージ / スタックトレース
+      description: エラーが出た場合は全文を貼ってください。
+      render: shell
+
+  - type: input
+    id: version
+    attributes:
+      label: sbipf-reporter のバージョン
+      description: "`sbipf-reporter version` の出力を貼ってください。"
+      placeholder: sbipf-reporter v0.4.2
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python のバージョン
+      description: "`python --version` の出力を貼ってください。"
+      placeholder: Python 3.12.3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: OS
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - その他
+    validations:
+      required: true
+
+  - type: dropdown
+    id: output-format
+    attributes:
+      label: 出力フォーマット
+      description: 事象が発生したフォーマットを選んでください（複数選択可）。
+      multiple: true
+      options:
+        - terminal
+        - md
+        - csv
+        - 出力以前の問題（パース時など）
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 補足
+      description: その他、参考になりそうなことがあれば書いてください。
