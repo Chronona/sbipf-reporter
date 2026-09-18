@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import unicodedata
+import warnings
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -170,6 +171,11 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
     Returns:
         パース結果の Holding リスト
 
+    データ行の変換に失敗した場合はその行を読み飛ばすが、
+    黙って捨てずに UserWarning を送出する. 欠落に気づけないまま
+    実際より少ない資産額が表示されるのを防ぐため.
+    警告をエラーとして扱いたい場合は warnings.simplefilter("error") を使う.
+
     Raises:
         RuntimeError: サポートする文字コードでデコードできなかった場合
     """
@@ -190,7 +196,7 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
     is_data_section = False
     layout: ColumnLayout | None = None
 
-    for row in rows:
+    for lineno, row in enumerate(rows, start=1):
         if not row or len(row) == 0:
             continue
 
@@ -252,7 +258,13 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
                         evaluation_value=_to_float(row[layout.col_evaluation_value]),
                     )
                 )
-            except (ValueError, IndexError):
+            except (ValueError, IndexError) as exc:
+                warnings.warn(
+                    f"{file_path}:{lineno}: データ行をパースできなかったためスキップしました "
+                    f"({exc}): {first_cell!r}",
+                    UserWarning,
+                    stacklevel=2,
+                )
                 continue
 
     return holdings
