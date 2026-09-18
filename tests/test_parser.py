@@ -193,3 +193,54 @@ def test_fullwidth_section_headers_still_detected() -> None:
 
     assert AccountType.UNKNOWN not in [h.account_type for h in holdings]
     assert len([h for h in holdings if h.account_type == AccountType.TOKUHU]) == 2
+
+
+def test_non_stock_section_headers_are_detected() -> None:
+    """「株式（」で始まらないセクションも新しい見出しとして扱う.
+
+    旧実装は見出しを 株式（ / 投資信託（ で決め打ちしていたため、
+    外国株式や債券のセクションを認識できず、直前セクションの口座区分を
+    引きずったまま銘柄を取り込んでいた.
+    """
+    holdings = parse_sbi_csv(Path("tests/fixtures/sbi_other_asset_sections.csv"))
+
+    assert [(h.code, h.account_type) for h in holdings] == [
+        ("6758", AccountType.TOKUHU),
+        ("AAPL", AccountType.NISA_GROWTH),
+        ("9999", AccountType.GENBUTSU),
+    ]
+
+
+def test_account_type_uses_custody_part_only() -> None:
+    """口座区分は「/」以降の預り区分だけで判定する."""
+    from sbipf_reporter.parser import _detect_account_type
+
+    assert _detect_account_type("株式（現物/特定預り）") == AccountType.TOKUHU
+    assert _detect_account_type("株式（信用/特定預り）") == AccountType.TOKUHU
+    assert _detect_account_type("外国株式（現物/NISA預り（成長投資枠））") == AccountType.NISA_GROWTH
+    assert _detect_account_type("投資信託（金額/NISA預り（つみたて投資枠））") == AccountType.NISA_TSUMITATE
+    assert _detect_account_type("債券（現物/一般預り）") == AccountType.GENBUTSU
+
+
+def test_nisa_is_matched_before_tokutei() -> None:
+    """預り区分にNISAと特定の両方の語が現れてもNISAを優先する.
+
+    旧実装は「特定」を先に判定していたため、このような見出しで
+    誤って特定口座と判定していた.
+    """
+    from sbipf_reporter.parser import _detect_account_type
+
+    assert _detect_account_type("株式（特定/NISA預り（成長投資枠））") == AccountType.NISA_GROWTH
+
+
+def test_aggregate_rows_are_not_treated_as_section_headers() -> None:
+    """「合計」で終わる1セル行を見出しとして誤検出しない."""
+    from sbipf_reporter.parser import _is_section_header
+
+    assert _is_section_header(["株式（現物/特定預り）", ""]) is True
+    assert _is_section_header(["株式(現物/特定預り)合計", ""]) is False
+    assert _is_section_header(["総合計", ""]) is False
+    assert _is_section_header(["ポートフォリオ一覧", ""]) is False
+    assert _is_section_header(["総件数：25件", ""]) is False
+    # データ行は複数セルが埋まっているので見出しにならない
+    assert _is_section_header(["6758 ソニー", "2025/03/12", "50"]) is False

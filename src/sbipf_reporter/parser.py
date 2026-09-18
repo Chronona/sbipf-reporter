@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import re
 import unicodedata
 import warnings
 from dataclasses import dataclass
@@ -119,10 +120,40 @@ class ColumnLayout:
     col_evaluation_value: int
 
 
+#: セクション見出しの形（例: ``株式(現物/特定預り)`` / ``投資信託(金額/NISA預り(成長投資枠))``）
+_SECTION_RE = re.compile(r"^[^()]+\(.+/.+\)$")
+
+
+def _is_section_header(row: list[str]) -> bool:
+    """セクション見出し行かどうかを判定する.
+
+    SBI証券CSVのセクション見出しは「1セルだけが埋まった行」かつ
+    ``<資産種別>(<取引区分>/<預り区分>)`` の形をしている.
+    資産種別を限定しないので ``外国株式`` や ``債券`` のセクションも検出できる.
+
+    データ行は複数セルが埋まっているため誤検出しない.
+    「合計」で終わる行は集計行なので見出しとして扱わない.
+
+    Args:
+        row: CSVの1行
+
+    Returns:
+        セクション見出し行なら True
+    """
+    populated = [cell for cell in row if cell.strip()]
+    if len(populated) != 1:
+        return False
+    header = _normalize(populated[0]).strip("【】[]")
+    if header.endswith("合計"):
+        return False
+    return bool(_SECTION_RE.match(header))
+
+
 def _detect_account_type(section_header: str) -> AccountType:
     """セクション見出しから口座区分を検出する.
 
-    括弧の全角/半角を問わないよう、内部で NFKC 正規化してから判定する.
+    見出しの括弧内、さらに ``/`` 以降の預り区分だけを見て判定する.
+    括弧の全角/半角は内部の NFKC 正規化で吸収する.
 
     Args:
         section_header: セクション見出しの文字列
@@ -130,14 +161,21 @@ def _detect_account_type(section_header: str) -> AccountType:
     Returns:
         判別した AccountType（判別不能なら UNKNOWN）
     """
-    section_header = _normalize(section_header)
-    if "現物/特定預り" in section_header or "特定" in section_header:
-        return AccountType.TOKUHU
-    if "現物/NISA預り(成長投資枠)" in section_header or "成長投資枠" in section_header:
-        return AccountType.NISA_GROWTH
-    if "現物/NISA預り(つみたて投資枠)" in section_header or "つみたて投資枠" in section_header:
+    header = _normalize(section_header).strip("【】[]")
+    match = re.match(r"^[^()]+\((.+)\)$", header)
+    inner = match.group(1) if match else header
+    # 「取引区分/預り区分」のうち預り区分だけを見る。資産種別や取引区分に
+    # 紛らわしい語が含まれていても誤判定しない。
+    custody = inner.split("/", 1)[1] if "/" in inner else inner
+
+    # NISA を特定より先に判定する（両方の語を含む見出しでの取り違えを防ぐ）。
+    if "つみたて投資枠" in custody:
         return AccountType.NISA_TSUMITATE
-    if "現物" in section_header:
+    if "成長投資枠" in custody:
+        return AccountType.NISA_GROWTH
+    if "特定" in custody:
+        return AccountType.TOKUHU
+    if "NISA" in custody or "一般" in custody or "現物" in custody:
         return AccountType.GENBUTSU
     return AccountType.UNKNOWN
 
@@ -244,11 +282,11 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
             is_data_section = True
             continue
 
-        # Detect section boundary by header patterns.
-        # 括弧が全角でも半角でも判定できるよう、正規化してから比較する。
-        clean_header = _normalize(first_cell).strip("【】[]")
-        if clean_header.startswith("株式(") or clean_header.startswith("投資信託("):
-            current_account_type = _detect_account_type(clean_header)
+        # Detect section boundary.
+        # 資産種別を限定せず、「1セルだけが埋まった <資産種別>(<取引区分>/<預り区分>)」
+        # の形の行を見出しとみなす。外国株式や債券のセクションも検出できる。
+        if _is_section_header(row):
+            current_account_type = _detect_account_type(first_cell)
             is_data_section = False
             continue
 
