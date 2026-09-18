@@ -3,9 +3,33 @@
 from __future__ import annotations
 
 import csv
+import unicodedata
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
+
+
+def _to_float(value: str) -> float:
+    """CSVのセルを float に変換する.
+
+    SBI証券のCSVは数値を桁区切りカンマ付きで出力することがある
+    (例: ``"1,000"``). 素の ``float()`` はこれを解釈できないため、
+    NFKC正規化で全角数字・全角記号を吸収したうえで、桁区切りカンマと
+    通貨記号を除去してから変換する.
+
+    Args:
+        value: CSVのセル文字列
+
+    Returns:
+        変換後の値
+
+    Raises:
+        ValueError: 数値として解釈できない場合
+    """
+    normalized = unicodedata.normalize("NFKC", value).strip()
+    for char in (",", "\u00a5", "\\", " ", "\u3000"):
+        normalized = normalized.replace(char, "")
+    return float(normalized)
 
 
 class AccountType(Enum):
@@ -221,11 +245,11 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
                         name=name,
                         account_type=current_account_type,
                         buy_date=row[layout.col_date].strip(),
-                        quantity=int(row[layout.col_quantity]),
-                        average_price=float(row[layout.col_average_price]),
-                        current_price=float(row[layout.col_current_price]),
-                        profit_loss=float(row[layout.col_profit_loss]),
-                        evaluation_value=float(row[layout.col_evaluation_value]),
+                        quantity=int(_to_float(row[layout.col_quantity])),
+                        average_price=_to_float(row[layout.col_average_price]),
+                        current_price=_to_float(row[layout.col_current_price]),
+                        profit_loss=_to_float(row[layout.col_profit_loss]),
+                        evaluation_value=_to_float(row[layout.col_evaluation_value]),
                     )
                 )
             except (ValueError, IndexError):
