@@ -4,6 +4,7 @@
 
 ### Fixed
 - サマリーの見出しを「保有者数」から「保有銘柄数」に修正 (#33)
+- 取得金額の合計が0のとき `print_summary` が `ZeroDivisionError` で落ちる不具合を修正 (#34)
 
 ### Added
 - GitHub Issue Forms のテンプレートを追加（バグ報告 / 機能要望 / 作業タスク）。

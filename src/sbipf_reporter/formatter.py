@@ -59,7 +59,9 @@ def print_summary(holdings: list[Holding]) -> None:
 
     total_eval = sum(h.evaluation_value for h in holdings)
     total_profit = sum(h.profit_loss for h in holdings)
-    total_rate = (total_profit / (total_eval - total_profit) * 100) if total_eval > 0 else 0
+    # 分母は取得金額（評価額 - 損益）。ガードも評価額ではなく分母そのものを見る。
+    total_cost = total_eval - total_profit
+    total_rate = (total_profit / total_cost * 100) if total_cost != 0 else 0.0
 
     console.print()
     console.print(f"[bold]保有銘柄数:[/bold] {len(holdings)} 件")
