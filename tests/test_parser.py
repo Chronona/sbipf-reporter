@@ -169,3 +169,27 @@ def test_valid_fixtures_parse_without_warnings() -> None:
         warnings.simplefilter("error")
         assert len(parse_sbi_csv(Path("tests/fixtures/sbi_sample.csv"))) == 16
         assert len(parse_sbi_csv(Path("tests/fixtures/sbi_10col.csv"))) == 3
+
+
+def test_halfwidth_section_headers_are_detected() -> None:
+    """半角括弧のセクション見出しでも口座区分を判別する.
+
+    旧実装は見出しを全角括弧で決め打ち比較していたため、半角括弧のCSVでは
+    セクションとして認識されず、全銘柄が UNKNOWN になっていた.
+    """
+    holdings = parse_sbi_csv(Path("tests/fixtures/sbi_halfwidth_sections.csv"))
+
+    assert [h.account_type for h in holdings] == [
+        AccountType.TOKUHU,
+        AccountType.NISA_GROWTH,
+        AccountType.NISA_TSUMITATE,
+    ]
+    assert AccountType.UNKNOWN not in [h.account_type for h in holdings]
+
+
+def test_fullwidth_section_headers_still_detected() -> None:
+    """全角括弧の既存フィクスチャも従来どおり判別できる（退行していない）."""
+    holdings = parse_sbi_csv(Path("tests/fixtures/sbi_sample.csv"))
+
+    assert AccountType.UNKNOWN not in [h.account_type for h in holdings]
+    assert len([h for h in holdings if h.account_type == AccountType.TOKUHU]) == 2
