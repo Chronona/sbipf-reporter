@@ -1,7 +1,10 @@
 """Tests for parser module."""
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
+
+import pytest
 
 from sbipf_reporter.parser import AccountType, Holding, parse_sbi_csv
 
@@ -134,3 +137,35 @@ def test_parse_thousand_separators() -> None:
     assert holding.current_price == 10240.0
     assert holding.profit_loss == 390000.0
     assert holding.evaluation_value == 10240000.0
+
+
+def test_unparsable_row_warns_instead_of_silently_skipping(tmp_path: Path) -> None:
+    """パース不能な行はスキップするが UserWarning を出す.
+
+    旧実装は except で無言スキップしていたため、資産額が実際より
+    少なく表示されてもユーザーが気づけなかった.
+    """
+    csv_path = tmp_path / "broken.csv"
+    csv_path.write_text(
+        '"株式（現物/特定預り）",\n'
+        '"銘柄（コード）","買付日","数量","参考単価","取得単価","現在値",'
+        '"前日比","前日比（％）","損益","損益（％）","評価額",\n'
+        '"6758 ソニー","2025/03/12",50,9800,9850,10240,+120,+1.19,+19500,+3.96,512000,\n'
+        '"9999 壊れ","2025/03/12",XX,9800,9850,10240,+120,+1.19,+19500,+3.96,512000,\n',
+        encoding="utf-8",
+    )
+
+    with pytest.warns(UserWarning, match="スキップ") as record:
+        holdings = parse_sbi_csv(csv_path)
+
+    assert len(holdings) == 1
+    assert "broken.csv:4" in str(record[0].message)
+    assert "9999 壊れ" in str(record[0].message)
+
+
+def test_valid_fixtures_parse_without_warnings() -> None:
+    """正常なCSVでは警告を出さない（誤検知しない）."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        assert len(parse_sbi_csv(Path("tests/fixtures/sbi_sample.csv"))) == 16
+        assert len(parse_sbi_csv(Path("tests/fixtures/sbi_10col.csv"))) == 3
