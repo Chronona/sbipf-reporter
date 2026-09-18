@@ -10,6 +10,23 @@ from enum import Enum
 from pathlib import Path
 
 
+def _normalize(text: str) -> str:
+    """全角/半角のゆれを吸収した比較用の文字列を返す.
+
+    SBI証券のCSVは同じ見出しを全角括弧・半角括弧の両方で出力する.
+    実際、見出しが ``株式（現物/特定預り）`` でも合計行は
+    ``株式(現物/特定預り)合計`` のように半角で出力される.
+    NFKC正規化で括弧の全角/半角を揃えてから比較する.
+
+    Args:
+        text: 正規化対象の文字列
+
+    Returns:
+        NFKC正規化し、前後の空白を除去した文字列
+    """
+    return unicodedata.normalize("NFKC", text).strip()
+
+
 def _to_float(value: str) -> float:
     """CSVのセルを float に変換する.
 
@@ -103,7 +120,17 @@ class ColumnLayout:
 
 
 def _detect_account_type(section_header: str) -> AccountType:
-    """セクション見出しから口座区分を検出する."""
+    """セクション見出しから口座区分を検出する.
+
+    括弧の全角/半角を問わないよう、内部で NFKC 正規化してから判定する.
+
+    Args:
+        section_header: セクション見出しの文字列
+
+    Returns:
+        判別した AccountType（判別不能なら UNKNOWN）
+    """
+    section_header = _normalize(section_header)
     if "現物/特定預り" in section_header or "特定" in section_header:
         return AccountType.TOKUHU
     if "現物/NISA預り(成長投資枠)" in section_header or "成長投資枠" in section_header:
@@ -217,9 +244,10 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
             is_data_section = True
             continue
 
-        # Detect section boundary by header patterns
-        clean_header = first_cell.strip("【】[]")
-        if clean_header.startswith("株式（") or clean_header.startswith("投資信託（"):
+        # Detect section boundary by header patterns.
+        # 括弧が全角でも半角でも判定できるよう、正規化してから比較する。
+        clean_header = _normalize(first_cell).strip("【】[]")
+        if clean_header.startswith("株式(") or clean_header.startswith("投資信託("):
             current_account_type = _detect_account_type(clean_header)
             is_data_section = False
             continue
