@@ -244,3 +244,54 @@ def test_aggregate_rows_are_not_treated_as_section_headers() -> None:
     assert _is_section_header(["総件数：25件", ""]) is False
     # データ行は複数セルが埋まっているので見出しにならない
     assert _is_section_header(["6758 ソニー", "2025/03/12", "50"]) is False
+
+
+def test_fund_names_are_not_split_into_code_and_name() -> None:
+    """投信はセル全体が銘柄名になり、証券コードは空になる.
+
+    旧実装は投信かどうかを銘柄名の3プレフィックス
+    （ｅＭＡＸＩＳ / ｉＦｒｅｅ / ＳＢＩ・）で決め打ちしていたため、
+    それ以外の投信名が空白で分割されていた.
+    """
+    holdings = parse_sbi_csv(Path("tests/fixtures/sbi_funds_various.csv"))
+
+    assert [h.code for h in holdings] == ["", "", ""]
+    assert [h.name for h in holdings] == [
+        "たわらノーロード 先進国株式",
+        "ニッセイ外国株式インデックスファンド",
+        "楽天・全米株式インデックス・ファンド",
+    ]
+
+
+def test_known_prefix_fund_names_still_parse() -> None:
+    """従来ハードコードで対応していた投信名も引き続き銘柄名として扱われる."""
+    holdings = parse_sbi_csv(Path("tests/fixtures/sbi_sample.csv"))
+    funds = [h for h in holdings if not h.code]
+
+    assert len(funds) == 5
+    assert funds[0].name.startswith("ｅＭＡＸＩＳ")
+    assert all(f.code == "" for f in funds)
+
+
+def test_stock_code_and_name_still_split() -> None:
+    """株式セクションでは従来どおり証券コードと銘柄名に分解する."""
+    holdings = parse_sbi_csv(Path("tests/fixtures/sbi_sample.csv"))
+    sony = next(h for h in holdings if h.code == "6758")
+
+    assert sony.name == "ソニー"
+
+
+def test_split_code_and_name_does_not_split_non_code_head() -> None:
+    """コードらしくない先頭語は分割しない（空白を含むファンド名の保険）."""
+    from sbipf_reporter.parser import _split_code_and_name
+
+    assert _split_code_and_name("6758 ソニー", is_fund=False) == ("6758", "ソニー")
+    assert _split_code_and_name("AAPL アップル", is_fund=False) == ("AAPL", "アップル")
+    assert _split_code_and_name("たわらノーロード 先進国株式", is_fund=False) == (
+        "",
+        "たわらノーロード 先進国株式",
+    )
+    assert _split_code_and_name("ｅＭＡＸＩＳ Ｓｌｉｍ 全世界株式", is_fund=True) == (
+        "",
+        "ｅＭＡＸＩＳ Ｓｌｉｍ 全世界株式",
+    )
