@@ -110,7 +110,17 @@ class Holding:
 
 @dataclass
 class ColumnLayout:
-    """CSV列レイアウト."""
+    """CSV列レイアウト.
+
+    Attributes:
+        col_date: 買付日の列インデックス
+        col_quantity: 数量の列インデックス
+        col_average_price: 取得単価の列インデックス
+        col_current_price: 現在値の列インデックス
+        col_profit_loss: 損益の列インデックス
+        col_evaluation_value: 評価額の列インデックス
+        is_fund: 投資信託セクション（列ヘッダーが「ファンド名」）なら True
+    """
 
     col_date: int
     col_quantity: int
@@ -118,6 +128,7 @@ class ColumnLayout:
     col_current_price: int
     col_profit_loss: int
     col_evaluation_value: int
+    is_fund: bool = False
 
 
 #: セクション見出しの形（例: ``株式(現物/特定預り)`` / ``投資信託(金額/NISA預り(成長投資枠))``）
@@ -180,14 +191,40 @@ def _detect_account_type(section_header: str) -> AccountType:
     return AccountType.UNKNOWN
 
 
+def _is_column_header(row: list[str]) -> bool:
+    """データ列のヘッダー行かどうかを判定する.
+
+    株式セクションは「銘柄（コード）」、投資信託セクションは「ファンド名」で始まる.
+
+    Args:
+        row: CSVの1行
+
+    Returns:
+        列ヘッダー行なら True
+    """
+    if not row:
+        return False
+    first = _normalize(row[0])
+    return first == "ファンド名" or first.startswith("銘柄(")
+
+
+def _is_fund_header(row: list[str]) -> bool:
+    """列ヘッダーが投資信託セクションのもの（「ファンド名」）か判定する."""
+    return bool(row) and _normalize(row[0]) == "ファンド名"
+
+
 def _detect_layout(header_row: list[str]) -> ColumnLayout:
     """ヘッダー行から列レイアウトを検出する.
 
     SBI証券CSVには2つのフォーマットが存在する:
     - 11列版: 参考単価, 取得単価, 現在値, ... (古いフォーマット)
     - 10列版: 取得単価, 現在値, ... (新しいフォーマット、参考単価なし)
+
+    あわせて、列ヘッダーが「ファンド名」か「銘柄（コード）」かで
+    投資信託セクションかどうかを判別し is_fund に持たせる.
     """
     headers = [h.strip() for h in header_row]
+    is_fund = _is_fund_header(header_row)
 
     # 11列版かどうかを「参考単価」の有無で判定
     has_reference = any("参考単価" in h for h in headers)
@@ -200,6 +237,7 @@ def _detect_layout(header_row: list[str]) -> ColumnLayout:
             col_current_price=5,
             col_profit_loss=8,
             col_evaluation_value=10,
+            is_fund=is_fund,
         )
     else:
         # 10列版: 参考単価がなく、取得単価が3列目
@@ -210,7 +248,33 @@ def _detect_layout(header_row: list[str]) -> ColumnLayout:
             col_current_price=4,
             col_profit_loss=7,
             col_evaluation_value=9,
+            is_fund=is_fund,
         )
+
+
+def _split_code_and_name(raw: str, *, is_fund: bool) -> tuple[str, str]:
+    """銘柄セルを証券コードと銘柄名に分解する.
+
+    投資信託には証券コードが存在しないため、セル全体を銘柄名として扱う.
+    株式は先頭の空白までをコードとみなすが、コードらしくない
+    （数字・英大文字のみでない）場合は分割せず、全体を銘柄名とする.
+    銘柄名に空白を含むファンドを誤って分割しないための保険.
+
+    Args:
+        raw: 銘柄セルの文字列
+        is_fund: 投資信託セクションなら True
+
+    Returns:
+        (証券コード, 銘柄名) のタプル
+    """
+    raw = raw.strip()
+    if is_fund:
+        return "", raw
+
+    head, sep, tail = raw.partition(" ")
+    if not sep or not re.fullmatch(r"[0-9A-Z]{3,8}", head):
+        return "", raw
+    return head, tail.strip()
 
 
 def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
@@ -228,6 +292,7 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
     CSVの構造:
       - 【株式（現物/特定預り）】のようなセクション見出しから口座区分を判別
       - 「銘柄（コード）」または「ファンド名」行をデータ開始位置として検出
+        （どちらの見出しかで株式/投資信託を判別する）
       - 「合計」行や集計行はスキップ
 
     Args:
@@ -277,7 +342,7 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
             continue
 
         # Detect section header (column names row)
-        if "銘柄（コード）" in first_cell or "ファンド名" in first_cell:
+        if _is_column_header(row):
             layout = _detect_layout(row)
             is_data_section = True
             continue
@@ -293,23 +358,9 @@ def parse_sbi_csv(file_path: str | Path) -> list[Holding]:
         # Parse data rows
         if is_data_section and len(row) >= 10 and layout is not None:
             try:
-                # Determine if stock or fund based on code pattern
-                code_name = row[0].strip()
-
-                if "," in code_name:
-                    code_name = code_name.split(",")[0].strip()
-
-                parts = code_name.split(" ", 1)
-                code = parts[0] if parts else ""
-                name = parts[1] if len(parts) > 1 else ""
-
-                if (
-                    first_cell.startswith("ｅＭＡＸＩＳ")
-                    or first_cell.startswith("ｉＦｒｅｅ")
-                    or first_cell.startswith("ＳＢＩ・")
-                ):
-                    code = ""
-                    name = first_cell
+                # 株式か投資信託かは、銘柄名ではなく列ヘッダー
+                # （「銘柄（コード）」/「ファンド名」）から判別する。
+                code, name = _split_code_and_name(row[0], is_fund=layout.is_fund)
 
                 holdings.append(
                     Holding(
