@@ -102,10 +102,28 @@ class Holding:
     evaluation_value: float
 
     @property
+    def acquisition_cost(self) -> float:
+        """取得金額（円）.
+
+        評価額から損益を差し引いて求める. 取得単価 × 数量 ではなく
+        CSVが出力した評価額・損益から導出するため、CSV内で完結して整合する.
+        取得単価は表示桁で丸められている場合があり、掛け算で求めると
+        合計が合わなくなる.
+        """
+        return self.evaluation_value - self.profit_loss
+
+    @property
     def profit_loss_rate(self) -> float:
-        if self.evaluation_value == 0:
+        """損益率（％）.
+
+        取得金額を分母とする（損益 ÷ 取得金額 × 100）.
+        ポートフォリオ全体の損益率と同じ基準なので、行と合計で定義が食い違わない.
+        取得金額が 0 の場合は 0.0 を返す.
+        """
+        cost = self.acquisition_cost
+        if cost == 0:
             return 0.0
-        return self.profit_loss / self.evaluation_value * 100
+        return self.profit_loss / cost * 100
 
 
 @dataclass

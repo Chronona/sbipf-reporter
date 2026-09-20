@@ -295,3 +295,47 @@ def test_split_code_and_name_does_not_split_non_code_head() -> None:
         "",
         "ｅＭＡＸＩＳ Ｓｌｉｍ 全世界株式",
     )
+
+
+def _holding(profit_loss: float, evaluation_value: float) -> Holding:
+    return Holding(
+        code="0000",
+        name="テスト",
+        account_type=AccountType.TOKUHU,
+        buy_date="2025/01/01",
+        quantity=1,
+        average_price=0.0,
+        current_price=0.0,
+        profit_loss=profit_loss,
+        evaluation_value=evaluation_value,
+    )
+
+
+def test_acquisition_cost_is_evaluation_minus_profit() -> None:
+    """取得金額は 評価額 - 損益 で求める."""
+    assert _holding(profit_loss=1000.0, evaluation_value=11000.0).acquisition_cost == 10000.0
+    assert _holding(profit_loss=-500.0, evaluation_value=9500.0).acquisition_cost == 10000.0
+
+
+def test_profit_loss_rate_is_based_on_acquisition_cost() -> None:
+    """損益率は取得金額基準（評価額基準ではない）.
+
+    取得 10,000 円 → 評価 11,000 円 なら 10.00%。
+    旧実装は評価額を分母にしていたため 9.09% と過小表示していた.
+    """
+    assert _holding(profit_loss=1000.0, evaluation_value=11000.0).profit_loss_rate == pytest.approx(10.0)
+    assert _holding(profit_loss=-500.0, evaluation_value=9500.0).profit_loss_rate == pytest.approx(-5.0)
+
+
+def test_profit_loss_rate_zero_cost_returns_zero() -> None:
+    """取得金額0でもゼロ除算しない."""
+    assert _holding(profit_loss=1000.0, evaluation_value=1000.0).profit_loss_rate == 0.0
+
+
+def test_row_rate_matches_total_rate_for_single_holding() -> None:
+    """1銘柄だけなら行の損益率と合計損益率が一致する（定義が同じ基準）."""
+    holding = _holding(profit_loss=1000.0, evaluation_value=11000.0)
+    total_cost = holding.evaluation_value - holding.profit_loss
+    total_rate = holding.profit_loss / total_cost * 100
+
+    assert holding.profit_loss_rate == pytest.approx(total_rate)
