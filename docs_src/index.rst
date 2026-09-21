@@ -60,6 +60,7 @@ API リファレンス
    :maxdepth: 1
 
    adr/0001-profit-loss-rate-basis
+   adr/0002-unify-portfolio-summary
 
 ----
 
