@@ -57,7 +57,7 @@ sbipf-reporter version
 損益率は **取得金額**（= 評価額 − 損益）を分母に計算します。銘柄ごとの損益率と
 ポートフォリオ合計の損益率は同じ基準なので、両者の定義が食い違うことはありません。
 
-詳細は [ADR-0001](docs_src/adr/0001-profit-loss-rate-basis.rst) を参照してください。
+詳細は [ADR-0001](adr/0001-profit-loss-rate-basis.rst) を参照してください。
 
 ## 対応CSVフォーマット
 

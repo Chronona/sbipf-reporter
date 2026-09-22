@@ -36,4 +36,12 @@ sbipf\_reporter.reporter module
    :undoc-members:
    :show-inheritance:
 
+sbipf\_reporter.summary module
+------------------------------
+
+.. automodule:: sbipf_reporter.summary
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 

@@ -53,15 +53,6 @@ API リファレンス
 
    development
 
-設計判断の記録 (ADR)
---------------------
-
-.. toctree::
-   :maxdepth: 1
-
-   adr/0001-profit-loss-rate-basis
-   adr/0002-unify-portfolio-summary
-
 ----
 
 :ref:`genindex` | :ref:`modindex` | :ref:`search`
