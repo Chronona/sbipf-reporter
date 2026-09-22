@@ -14,7 +14,11 @@
 - ターミナル表示と Markdown 出力で別実装になっていた合計の算出を一本化。出力値は変わらない (#41)
 - main への push で release ジョブが TestPyPI への重複アップロードにより毎回失敗していたのを修正 (#44)
 
+### Changed
+- ADR を `docs_src/` から `adr/` に移動。GitHub Pages は利用マニュアルという位置づけのため、開発経緯の記録をデプロイ対象から外した
+
 ### Added
+- API リファレンスに `sbipf_reporter.summary` モジュールを追加（#41 で追加した際の記載漏れ）
 - `Holding.acquisition_cost` プロパティ（取得金額） (#40)
 - ADR-0001: 損益率の分母を取得金額に統一する決定を記録 (#40)
 - `sbipf_reporter.summary` モジュール（`PortfolioSummary` / `summarize`）。ターミナル表示とMarkdown出力が同じ集計実装を共有する (#41)

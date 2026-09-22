@@ -58,6 +58,24 @@ sbipf-reporter は CLI ツールですが、Python コードから直接利用�
 
    output_report(nisa, OutputFormat.TERMINAL)
 
+合計を集計する
+--------------
+
+.. code-block:: python
+
+   from sbipf_reporter import parse_sbi_csv, summarize
+
+   holdings = parse_sbi_csv("portfolio.csv")
+   total = summarize(holdings)
+
+   print(f"保有銘柄数: {total.count} 件")
+   print(f"総資産: ¥{total.total_evaluation:,.0f}")
+   print(f"取得金額: ¥{total.total_cost:,.0f}")
+   print(f"損益: ¥{total.total_profit_loss:+,.0f} ({total.profit_loss_rate:+.2f}%)")
+
+損益率は取得金額（評価額 - 損益）を分母とします。
+銘柄ごとの ``Holding.profit_loss_rate`` も同じ基準です。
+
 API リファレンス
 ----------------
 
