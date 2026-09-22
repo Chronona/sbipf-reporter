@@ -37,8 +37,8 @@ def test_parse_sbi_csv_first_holding() -> None:
     assert stock.quantity == 50
     assert stock.average_price == 9850.0
     assert stock.current_price == 10240.0
-    assert stock.profit_loss == 1950.0
-    assert stock.evaluation_value == 51200.0
+    assert stock.profit_loss == 19500.0
+    assert stock.evaluation_value == 512000.0
 
 
 def test_parse_sbi_csv_nisa_growth() -> None:
@@ -116,7 +116,7 @@ def test_parse_sbi_csv_10col_format() -> None:
     assert tokuhu[0].code == "6758"
     assert tokuhu[0].average_price == 9800.0
     assert tokuhu[0].current_price == 10240.0
-    assert tokuhu[0].evaluation_value == 51200.0
+    assert tokuhu[0].evaluation_value == 512000.0
 
     nisa_growth = [h for h in holdings if h.account_type == AccountType.NISA_GROWTH]
     assert len(nisa_growth) == 1
