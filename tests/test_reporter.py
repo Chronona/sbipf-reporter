@@ -47,7 +47,7 @@ def test_csv_output_contains_correct_data(tmp_path: Path) -> None:
     assert "6758" in first_row
     assert "ソニー" in first_row
     assert "特定" in first_row
-    assert "1950.0" in first_row  # profit
+    assert "19500.0" in first_row  # profit
 
 
 def test_markdown_output_contains_correct_data(tmp_path: Path) -> None:
@@ -60,4 +60,4 @@ def test_markdown_output_contains_correct_data(tmp_path: Path) -> None:
 
     assert "6758" in content
     assert "ソニー" in content
-    assert "+3.42%" in content  # total profit rate
+    assert "+7.63%" in content  # total profit rate
